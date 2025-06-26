@@ -13,7 +13,7 @@
 
 ---
 
-## Установка:
+## Установка (производится на каждую нужную ноду):
 
 ```bash
 curl -sL https://raw.githubusercontent.com/distillium/warp-native/main/install.sh | bash
@@ -21,7 +21,7 @@ curl -sL https://raw.githubusercontent.com/distillium/warp-native/main/install.s
 
 ## Шаблоны для конфигурации Xray
 <details>
-  <summary>Показать пример outbound</summary>
+  <summary>📝 Показать пример outbound</summary>
 
 ```json
 {
@@ -38,7 +38,7 @@ curl -sL https://raw.githubusercontent.com/distillium/warp-native/main/install.s
 </details>
 
 <details>
-  <summary>Показать пример routing rule</summary>
+  <summary>📝 Показать пример routing rule</summary>
 
 ```json
 {
