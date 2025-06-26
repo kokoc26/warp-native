@@ -93,12 +93,19 @@ mv "$WGCF_CONF_FILE" /etc/wireguard/warp.conf || error_exit "Не удалось
 ok "Конфигурация сохранена в /etc/wireguard/warp.conf."
 echo ""
 
-info "6. Подключение интерфейса WARP..."
+info "6. Удаляем IPv6-адрес из конфигурации warp (если есть)..."
+sed -i 's/,\s*[0-9a-fA-F:]\+\/128//' /etc/wireguard/warp.conf
+sed -i '/Address = [0-9a-fA-F:]\+\/128/d' /etc/wireguard/warp.conf
+ok "IPv6-адрес удалён из конфигурации."
+echo ""
+
+
+info "7. Подключение интерфейса WARP..."
 wg-quick up warp &>/dev/null || error_exit "Не удалось подключить интерфейс."
 ok "Интерфейс WARP успешно подключен."
 echo ""
 
-info "7. Проверка статуса подключения WARP..."
+info "8. Проверка статуса подключения WARP..."
 check_warp=$(curl -s --interface warp https://www.cloudflare.com/cdn-cgi/trace | grep "warp=")
 if echo "$check_warp" | grep -q "warp=on"; then
     ok "WARP работает корректно ($check_warp)"
@@ -108,7 +115,7 @@ else
 fi
 echo ""
 
-info "8. Включение автозапуска WARP при старте..."
+info "9. Включение автозапуска WARP при старте..."
 systemctl enable wg-quick@warp &>/dev/null || error_exit "Не удалось настроить автозапуск."
 ok "Автозапуск включен."
 echo ""
