@@ -35,10 +35,10 @@ sleep 2
 info "Начинаем установку и настройку Cloudflare WARP"
 echo ""
 
-info "1. Установка WireGuard и resolvconf..."
+info "1. Установка WireGuard..."
 apt update -qq &>/dev/null || error_exit "Не удалось обновить список пакетов."
-apt install wireguard resolvconf -y &>/dev/null || error_exit "Не удалось установить WireGuard и resolvconf."
-ok "WireGuard и resolvconf установлены."
+apt install wireguard -y &>/dev/null || error_exit "Не удалось установить WireGuard."
+ok "WireGuard установлен."
 echo ""
 
 info "2. Назначение временных DNS (1.1.1.1 + 8.8.8.8)..."
