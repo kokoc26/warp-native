@@ -94,12 +94,24 @@ mv "$WGCF_CONF_FILE" /etc/wireguard/warp.conf || error_exit "Не удалось
 ok "Конфигурация сохранена в /etc/wireguard/warp.conf."
 echo ""
 
-info "6. Удаляем IPv6-адрес из конфигурации warp (если есть)..."
-sed -i 's/,\s*[0-9a-fA-F:]\+\/128//' /etc/wireguard/warp.conf
-sed -i '/Address = [0-9a-fA-F:]\+\/128/d' /etc/wireguard/warp.conf
-ok "IPv6-адрес удалён из конфигурации."
-echo ""
+info "6. Проверка включён ли IPv6 и настройка конфигурации WARP..."
 
+is_ipv6_enabled() {
+    sysctl net.ipv6.conf.all.disable_ipv6 2>/dev/null | grep -q ' = 0' || return 1
+    sysctl net.ipv6.conf.default.disable_ipv6 2>/dev/null | grep -q ' = 0' || return 1
+    ip -6 addr show scope global | grep -qv 'inet6 .*fe80::' || return 1
+    return 0
+}
+
+if is_ipv6_enabled; then
+    ok "IPv6 включён на сервере — оставляем IPv6-адрес в конфигурации WARP."
+else
+    warn "IPv6 отключён или не настроен на сервере — удаляем IPv6-адрес из конфигурации WARP."
+    sed -i 's/,\s*[0-9a-fA-F:]\+\/128//' /etc/wireguard/warp.conf
+    sed -i '/Address = [0-9a-fA-F:]\+\/128/d' /etc/wireguard/warp.conf
+    ok "IPv6-адрес удалён из конфигурации."
+fi
+echo ""
 
 info "7. Подключение интерфейса WARP..."
 wg-quick up warp &>/dev/null || error_exit "Не удалось подключить интерфейс."
