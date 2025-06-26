@@ -41,7 +41,8 @@ apt install wireguard -y &>/dev/null || error_exit "Не удалось уста
 ok "WireGuard установлен."
 echo ""
 
-info "2. Назначение временных DNS (1.1.1.1 + 8.8.8.8)..."
+info "2. Назначение временных DNS (1.1.1.1 + 8.8.8.8), чтобы гарантировать установку и регистрацию wgcf..."
+cp /etc/resolv.conf /etc/resolv.conf.backup
 echo -e "nameserver 1.1.1.1\nnameserver 8.8.8.8" > /etc/resolv.conf || error_exit "Не удалось настроить временные DNS-серверы."
 ok "Временные DNS-серверы установлены."
 echo ""
@@ -120,6 +121,8 @@ systemctl enable wg-quick@warp &>/dev/null || error_exit "Не удалось н
 ok "Автозапуск включен."
 echo ""
 
+cp /etc/resolv.conf.backup /etc/resolv.conf
+ok "DNS возвращены к заводскому состоянию"
 ok "Установка и настройка Cloudflare WARP завершены!"
 echo -e "\n\e[1;36m➤ Статус: \e[0mwg show warp"
 echo -e "\e[1;36m➤ Отключить: \e[0mwg-quick down warp"
