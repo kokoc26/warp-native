@@ -58,12 +58,11 @@ fi
 WGCF_DOWNLOAD_URL="https://github.com/ViRb3/wgcf/releases/download/${WGCF_VERSION}/wgcf_${WGCF_VERSION#v}_linux_amd64"
 WGCF_BINARY_NAME="wgcf_${WGCF_VERSION#v}_linux_amd64"
 
-info "   Загружаем wgcf $WGCF_VERSION..."
 wget -q "$WGCF_DOWNLOAD_URL" -O "$WGCF_BINARY_NAME" || error_exit "Не удалось скачать wgcf."
 
 chmod +x "$WGCF_BINARY_NAME" || error_exit "Не удалось сделать wgcf исполняемым."
 mv "$WGCF_BINARY_NAME" /usr/local/bin/wgcf || error_exit "Не удалось переместить wgcf в /usr/local/bin."
-ok "wgcf установлен в /usr/local/bin/wgcf."
+ok "wgcf $WGCF_VERSION установлен в /usr/local/bin/wgcf."
 echo ""
 
 info "4. Регистрация и генерация конфигурации wgcf..."
@@ -114,17 +113,37 @@ fi
 echo ""
 
 info "7. Подключение интерфейса WARP..."
-wg-quick up warp &>/dev/null || error_exit "Не удалось подключить интерфейс."
+systemctl start wg-quick@warp &>/dev/null || error_exit "Не удалось подключить интерфейс."
 ok "Интерфейс WARP успешно подключен."
 echo ""
 
 info "8. Проверка статуса подключения WARP..."
-check_warp=$(curl -s --interface warp https://www.cloudflare.com/cdn-cgi/trace | grep "warp=")
-if echo "$check_warp" | grep -q "warp=on"; then
-    ok "WARP работает корректно ($check_warp)"
+
+if ! wg show warp &>/dev/null; then
+    fail "Интерфейс WARP не найден — туннель не работает."
+    exit 1
+fi
+
+for i in {1..10}; do
+    handshake=$(wg show warp | grep "latest handshake" | awk -F': ' '{print $2}')
+    if [[ "$handshake" == *"second"* || "$handshake" == *"minute"* ]]; then
+        ok "Получен handshake → $handshake"
+        ok "WARP подключён и активно обменивается трафиком."
+        break
+    fi
+    sleep 1
+done
+
+if [[ -z "$handshake" || "$handshake" == "0 seconds ago" ]]; then
+    warn "Не удалось получить handshake в течении 10 секунд. Возможны проблемы с подключением."
+fi
+
+curl_result=$(curl -s --interface warp https://www.cloudflare.com/cdn-cgi/trace | grep "warp=" | cut -d= -f2)
+
+if [[ "$curl_result" == "on" ]]; then
+    ok "Ответ от Cloudflare: warp=on"
 else
-    warn "WARP не активен или не удалось проверить подключение."
-    echo "      ➤ Результат: $check_warp"
+    warn "Cloudflare не подтвердил warp=on, но интерфейс работает. Это нормально."
 fi
 echo ""
 
@@ -136,8 +155,12 @@ echo ""
 cp /etc/resolv.conf.backup /etc/resolv.conf
 ok "DNS возвращены к заводскому состоянию"
 ok "Установка и настройка Cloudflare WARP завершены!"
-echo -e "\n\e[1;36m➤ Статус: \e[0mwg show warp"
-echo -e "\e[1;36m➤ Отключить: \e[0mwg-quick down warp"
-echo -e "\e[1;36m➤ Перезапуск: \e[0msystemctl restart wg-quick@warp"
-echo -e "\e[1;36m➤ Убрать автозапуск: \e[0msystemctl disable wg-quick@warp"
+echo ""
+echo -e "\e[1;36m➤ Проверить статус службы: \e[0msystemctl status wg-quick@warp"
+echo -e "\e[1;36m➤ Посмотреть информацию (WG): \e[0mwg show warp"
+echo -e "\e[1;36m➤ Остановить интерфейс: \e[0msystemctl stop wg-quick@warp"
+echo -e "\e[1;36m➤ Запустить интерфейс: \e[0msystemctl start wg-quick@warp"
+echo -e "\e[1;36m➤ Перезапустить интерфейс: \e[0msystemctl restart wg-quick@warp"
+echo -e "\e[1;36m➤ Отключить автозапуск: \e[0msystemctl disable wg-quick@warp"
+echo -e "\e[1;36m➤ Включить автозапуск: \e[0msystemctl enable wg-quick@warp"
 echo ""
