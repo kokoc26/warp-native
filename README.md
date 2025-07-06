@@ -57,16 +57,18 @@ curl -sL https://raw.githubusercontent.com/distillium/warp-native/main/install.s
 ```
 </details>
 
-## Доступные команды после установки:
+## Управление интерфейсом WARP
 
-| Операция                    | Команда                           |
-| --------------------------- | --------------------------------- |
-| Проверить статус интерфейса | `wg show warp`                    |
-| Отключить интерфейс         | `wg-quick down warp`              |
-| Включить интерфейс          | `wg-quick up warp`                |
-| Перезапустить интерфейс     | `systemctl restart wg-quick@warp` |
-| Отключить автозапуск        | `systemctl disable wg-quick@warp` |
-| Включить автозапуск         | `systemctl enable wg-quick@warp`  |
+| Операция                    | Команда                             |
+|----------------------------|--------------------------------------|
+| Проверить статус службы     | `systemctl status wg-quick@warp`     |
+| Посмотреть информацию (wg) | `wg show warp`                       |
+| Остановить интерфейс        | `systemctl stop wg-quick@warp`       |
+| Запустить интерфейс         | `systemctl start wg-quick@warp`      |
+| Перезапустить интерфейс     | `systemctl restart wg-quick@warp`    |
+| Отключить автозапуск        | `systemctl disable wg-quick@warp`    |
+| Включить автозапуск         | `systemctl enable wg-quick@warp`     |
+
 
 ## Удаление:
 ```bash
