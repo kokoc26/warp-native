@@ -31,7 +31,7 @@ rm -rf /etc/wireguard &>/dev/null
 rm -f /usr/local/bin/wgcf &>/dev/null
 rm -f wgcf-account.toml wgcf-profile.conf &>/dev/null
 
-info "Удаляем пакеты wireguard и resolvconf..."
+info "Удаляем пакеты wireguard..."
 DEBIAN_FRONTEND=noninteractive apt remove --purge -y wireguard &>/dev/null || true
 DEBIAN_FRONTEND=noninteractive apt autoremove -y &>/dev/null || true
 
