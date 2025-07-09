@@ -29,7 +29,8 @@ curl -sL https://raw.githubusercontent.com/distillium/warp-native/main/install.s
   "settings": {},
   "streamSettings": {
     "sockopt": {
-      "interface": "warp"
+      "interface": "warp",
+      "tcpFastOpen": true
     }
   }
 }
