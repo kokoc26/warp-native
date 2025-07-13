@@ -1,4 +1,10 @@
-![screenshot](screenshot.png)
+<p aling="center"><a href="https://github.com/distillium/warp-native">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="./media/logo.png" />
+   <source media="(prefers-color-scheme: light)" srcset="./media/logo-black.png" />
+   <img alt="Warp Native" src="https://github.com/distillium/warp-native" />
+ </picture>
+</a></p>
 
 Этот скрипт устанавливает Cloudflare WARP в "нативном" режиме через `WireGuard`, как интерфейс, без использования `warp-cli`.
 
