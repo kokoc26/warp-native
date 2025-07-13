@@ -36,8 +36,12 @@ info "Начинаем установку и настройку Cloudflare WARP"
 echo ""
 
 info "1. Установка WireGuard..."
-apt update -qq &>/dev/null || error_exit "Не удалось обновить список пакетов."
-apt install wireguard -y &>/dev/null || error_exit "Не удалось установить WireGuard."
+if grep -qE "ID=(debian|ubuntu)" /etc/os-release; then
+    apt update -qq &>/dev/null || error_exit "Не удалось обновить список пакетов."
+    apt install wireguard -y &>/dev/null || error_exit "Не удалось установить WireGuard."
+elif grep -qE "ID_LIKE=.*(rhel|centos|fedora).*" /etc/os-release; then
+    dnf install -y wireguard-tools &>/dev/null || error_exit "Не удалось установить WireGuard."
+fi
 ok "WireGuard установлен."
 echo ""
 
@@ -89,7 +93,7 @@ if ! grep -q "PersistentKeepalive = 25" "$WGCF_CONF_FILE"; then
 fi
 
 mkdir -p /etc/wireguard || error_exit "Не удалось создать директорию /etc/wireguard."
-mv "$WGCF_CONF_FILE" /etc/wireguard/warp.conf || error_exit "Не удалось переместить конфигурацию."
+mv -Z "$WGCF_CONF_FILE" /etc/wireguard/warp.conf || error_exit "Не удалось переместить конфигурацию."
 ok "Конфигурация сохранена в /etc/wireguard/warp.conf."
 echo ""
 
@@ -138,7 +142,7 @@ if [[ -z "$handshake" || "$handshake" == "0 seconds ago" ]]; then
     warn "Не удалось получить handshake в течении 10 секунд. Возможны проблемы с подключением."
 fi
 
-curl_result=$(curl -s --interface warp https://www.cloudflare.com/cdn-cgi/trace | grep "warp=" | cut -d= -f2)
+curl_result=$(curl -m 20 -s --interface warp https://www.cloudflare.com/cdn-cgi/trace | grep "warp=" | cut -d= -f2)
 
 if [[ "$curl_result" == "on" ]]; then
     ok "Ответ от Cloudflare: warp=on"
