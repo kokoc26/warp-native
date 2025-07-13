@@ -32,7 +32,12 @@ rm -f /usr/local/bin/wgcf &>/dev/null
 rm -f wgcf-account.toml wgcf-profile.conf &>/dev/null
 
 info "Удаляем пакеты wireguard..."
-DEBIAN_FRONTEND=noninteractive apt remove --purge -y wireguard &>/dev/null || true
-DEBIAN_FRONTEND=noninteractive apt autoremove -y &>/dev/null || true
+if grep -qE "ID=(debian|ubuntu)" /etc/os-release; then
+    DEBIAN_FRONTEND=noninteractive apt remove --purge -y wireguard &>/dev/null || true
+    DEBIAN_FRONTEND=noninteractive apt autoremove -y &>/dev/null || true
+elif grep -qE "ID_LIKE=.*(rhel|centos|fedora).*" /etc/os-release; then
+    dnf remove -y wireguard-tools &>/dev/null || true
+    dnf autoremove -y &>/dev/null || true
+fi
 
 completed "Удаление завершено."
